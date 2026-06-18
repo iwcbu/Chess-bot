@@ -50,5 +50,5 @@ def evaluate_Claude_Shannon(board: chess.Board):
 
     white_score = materialScore + mobilituScore - pawnPosScore
 
-    return white_score if board.turn == chess.WHITE else -white_score
+    return white_score
 

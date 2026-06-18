@@ -5,6 +5,7 @@ import random
 import math
 
 from .evaluation import evaluate_Claude_Shannon
+from .search import choose_minimax_move, choose_minimax_with_ab_move
 
 
 
@@ -62,5 +63,17 @@ def choose_greedy_move(board: chess.Board):
         
         return best[1]
 
+
+
+def choose_bot_move(board: chess.Board, difficulty: str):
+    match difficulty:
+        case 'easy':
+            return choose_random_move(board)
+        case 'medium':
+            return choose_greedy_move(board)
+        case 'hard':
+            return choose_minimax_move(board, 2)
+        case 'expert':
+            return choose_minimax_with_ab_move(board, 4)
 
 

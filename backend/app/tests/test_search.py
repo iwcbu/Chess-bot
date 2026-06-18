@@ -72,8 +72,8 @@ from app.engine.search import choose_minimax_move, choose_minimax_with_ab_move
 
 
 
-# Alpha beta pruning tests
 
+# Alpha beta pruning tests
 
 def test_abMinimax_returns_legal_move():
     game = Game()
@@ -102,6 +102,7 @@ def test_abMinimax__handles_game_over():
     assert game.board.is_valid() == True
 
     move = choose_minimax_with_ab_move(game.board, 2)
+
     
     assert move == None
 
@@ -139,7 +140,10 @@ def test_abMinimax_board_state_unchanged():
 
     move = choose_minimax_with_ab_move(game.board, 3)
 
+    assert move is not None
     assert game.board.fen() == starting_fen
+
+
 
 
 
