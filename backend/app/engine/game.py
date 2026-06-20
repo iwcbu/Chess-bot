@@ -1,9 +1,37 @@
 import chess
+import math
+   
+PIECE_VALUES = {
+    chess.PAWN: 1,
+    chess.KNIGHT: 3,
+    chess.BISHOP: 3,
+    chess.ROOK: 5,
+    chess.QUEEN: 9,
+    chess.KING: 0,
+}
+
 
 class Game():
     def __init__(self):
         self.board = chess.Board()
         self.draw = False
+        self.white_mat_score = {
+            chess.PAWN: 8,
+            chess.KNIGHT: 2,
+            chess.BISHOP: 2,
+            chess.ROOK: 2,
+            chess.QUEEN: 1,
+            chess.KING: 1,
+        }
+        self.black_mat_score = {
+            chess.PAWN: 8,
+            chess.KNIGHT: 2,
+            chess.BISHOP: 2,
+            chess.ROOK: 2,
+            chess.QUEEN: 1,
+            chess.KING: 1,
+        }
+        
 
     def update_board_from_fen(self, fen: str):
         self.board = chess.Board(fen=fen)
@@ -11,13 +39,18 @@ class Game():
     def update_draw(self, status: bool):
         self.draw = status
 
+    def get_material_score(self, color: bool):
+        if color == chess.WHITE:
+            return sum(self.white_mat_score.values())
+        else:
+            return sum(self.black_mat_score.values())
 
 
     def get_state(self):
         return {
             "fen": self.board.fen(),
             "turn": "white" if self.board.turn else "black",
-            "legal_moves": Game.get_legal_moves(self.board),
+            "legal_moves": self.get_legal_moves(),
             "status": self.get_status(),
             "last_move": self.get_last_move(),
         }
@@ -33,8 +66,19 @@ class Game():
             raise ValueError("Illegal move: " + move_uci)
         
         move = chess.Move.from_uci(move_uci)
-        
+
+
+        if self.board.is_capture(move):
+            victim = self.board.piece_at(move.to_square)
+            if self.board.turn == chess.WHITE:
+                self.black_mat_score[victim.piece_type] -= 1
+            else:
+                self.white_mat_score[victim.piece_type] -= 1
+
         self.board.push(move)
+
+        
+
         return self.get_state()
     
     def undo_move(self):
@@ -44,6 +88,14 @@ class Game():
         
         move = self.board.pop()
         print("Undid " + move.uci())
+
+
+        if self.board.is_capture(move):
+            victim = self.board.piece_at(move.to_square)
+            if self.board.turn == chess.WHITE:
+                self.black_mat_score[victim.piece_type] += 1
+            else:
+                self.white_mat_score[victim.piece_type] += 1
 
         ret = { 
             "undone_move": move.uci(),
@@ -80,6 +132,17 @@ class Game():
     
     def claim_draw(self):
         self.draw = True
+
+
+    
+    def is_piece(board: chess.Board, sq: chess.Square, pc: str):
+        piece = board.piece_at(sq)
+        if piece is None:
+            return 0
+        
+        return 1 if piece.symbol == pc else 0
+         
+
         
 
     def count_pieces(board_fen: str):
