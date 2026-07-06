@@ -1,3 +1,9 @@
-import { type RouteConfig, index } from "@react-router/dev/routes";
+// frontend/app/routes.ts
 
-export default [index("routes/home.tsx")] satisfies RouteConfig;
+import { type RouteConfig, index, route } from "@react-router/dev/routes";
+
+export default [
+    index("routes/game.tsx"),
+    route("about", "routes/about.tsx"),
+
+] satisfies RouteConfig;

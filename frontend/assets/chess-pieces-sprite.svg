@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="chess-pawn" viewBox="0 0 100 100">
+    <g fill="currentColor" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="50" cy="26" r="12"/>
+    <path d="M38 45 Q50 35 62 45 L68 74 H32 Z"/>
+    <path d="M28 82 H72"/>
+    <path d="M34 74 H66"/>
+    </g>
+  </symbol>
+  <symbol id="chess-rook" viewBox="0 0 100 100">
+    <g fill="currentColor" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 18 H38 V27 H46 V18 H54 V27 H62 V18 H72 V38 H28 Z"/>
+    <path d="M35 38 H65 L61 74 H39 Z"/>
+    <path d="M29 82 H71"/>
+    <path d="M36 74 H64"/>
+    </g>
+  </symbol>
+  <symbol id="chess-knight" viewBox="0 0 100 100">
+    <g fill="currentColor" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M63 19 C53 18 44 22 39 31 L31 47 L42 46 L35 59 C33 64 36 70 42 70 H68 C66 58 70 44 61 35 L68 31 C69 25 68 21 63 19 Z"/>
+    <path d="M43 35 C49 31 54 31 60 36" fill="none" stroke="currentColor" stroke-width="3"/>
+    <circle cx="55" cy="29" r="1.8" fill="currentColor" stroke="none"/>
+    <path d="M28 82 H72"/>
+    <path d="M36 70 H66"/>
+    </g>
+  </symbol>
+  <symbol id="chess-bishop" viewBox="0 0 100 100">
+    <g fill="currentColor" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="50" cy="18" r="8"/>
+    <path d="M36 47 C36 32 64 32 64 47 C64 57 58 65 50 70 C42 65 36 57 36 47 Z"/>
+    <path d="M58 36 L44 58" fill="none" stroke="currentColor" stroke-width="4"/>
+    <path d="M31 82 H69"/>
+    <path d="M37 72 H63"/>
+    </g>
+  </symbol>
+  <symbol id="chess-queen" viewBox="0 0 100 100">
+    <g fill="currentColor" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M25 39 L32 21 L42 38 L50 18 L58 38 L68 21 L75 39 Z"/>
+    <circle cx="32" cy="20" r="4"/>
+    <circle cx="50" cy="17" r="4"/>
+    <circle cx="68" cy="20" r="4"/>
+    <path d="M35 39 H65 L61 72 H39 Z"/>
+    <path d="M28 82 H72"/>
+    <path d="M35 72 H65"/>
+    </g>
+  </symbol>
+  <symbol id="chess-king" viewBox="0 0 100 100">
+    <g fill="currentColor" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M50 13 V31" fill="none"/>
+    <path d="M42 22 H58" fill="none"/>
+    <path d="M30 43 C34 29 66 29 70 43 L61 72 H39 Z"/>
+    <path d="M34 43 H66"/>
+    <path d="M28 82 H72"/>
+    <path d="M36 72 H64"/>
+    </g>
+  </symbol>
+</svg>

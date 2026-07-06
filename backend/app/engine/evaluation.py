@@ -284,8 +284,8 @@ def piece_table_score(board: chess.Board):
                 score -= br_table[square]
             case "q":
                 score -= bq_table[square]
-            case "k":
-                score -= bk_table[square]
+
+
             case "P":
                 score += wp_table[square]
             case "N":
@@ -296,28 +296,32 @@ def piece_table_score(board: chess.Board):
                 score += wr_table[square]
             case "Q":
                 score += wq_table[square]
+
+            
+            case "k":
+                score -= bk_endgame_table[square] if Game.is_endgame(board) else bk_table[square]
             case "K":
-                score += wk_table[square]
+                score += wk_endgame_table[square] if Game.is_endgame(board) else wk_table[square]
 
     return score / 100
 
    
-PIECE_VALUES = {
+P_VICTIMS = {
     chess.PAWN: 10,
     chess.KNIGHT: 35,
     chess.BISHOP: 33,
     chess.ROOK: 50,
     chess.QUEEN: 600,
-    chess.KING: 0,
+    chess.KING: 100,
 }
 
-PIECE_VALUES_ATTACKING = {
+P_ATTACKER = {
     chess.PAWN: 1,
     chess.KNIGHT: 10,
     chess.BISHOP: 12,
     chess.ROOK: 30,
     chess.QUEEN: 70,
-    chess.KING: 0
+    chess.KING: 30
 }
 
 def check_if_mate_in_one(board: chess.Board):
@@ -328,7 +332,13 @@ def check_if_mate_in_one(board: chess.Board):
         for move in list(board.legal_moves):
             board.push(move)
             if board.is_checkmate():
-                score += 100
+                score += 10000
+            else:
+                for move2 in list(board.legal_moves):
+                    if board.is_capture(move2):
+                        victim = board.piece_at(move2.to_square)
+                        attacker = board.piece_at(move2.from_square)
+                        score += P_VICTIMS[victim] - P_ATTACKER[attacker]
             board.pop()
         
         return score
@@ -342,7 +352,6 @@ def check_if_mate_in_one(board: chess.Board):
             board.pop()
         
         return score / 100
-
 
 
 

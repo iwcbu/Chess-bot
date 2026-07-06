@@ -1,5 +1,5 @@
 import chess
-import math
+import random
    
 PIECE_VALUES = {
     chess.PAWN: 1,
@@ -31,6 +31,12 @@ class Game():
             chess.QUEEN: 1,
             chess.KING: 1,
         }
+
+        self.bot_color = chess.BLACK
+
+        o = [ "ruy_lopez", "italian_game", "queens_gambit" ] if self.bot_color else [ "sicilian_defense" "caro_kann", "kings_indian_defense" ]
+        self.bot_opening = random.choice(o)
+
         
 
     def update_board_from_fen(self, fen: str):
@@ -53,6 +59,7 @@ class Game():
             "legal_moves": self.get_legal_moves(),
             "status": self.get_status(),
             "last_move": self.get_last_move(),
+            "opening": self.bot_opening
         }
     
     def get_legal_moves(self):
@@ -290,10 +297,19 @@ class Game():
                         count += 1
         
         return count
-                
+    
 
+    def is_endgame(board: chess.Board):
+        fen = board.fen()
 
+        if ("Q" not in fen) or ("q" not in fen):
+            return True
+        
+        else:
+            pieces = Game.count_pieces(fen)
+        
+            if (pieces["R"] + pieces["B"] + pieces["N"] < 4) or (pieces["r"] + pieces["b"] + pieces["n"] < 4):
+                return True
 
-            
-
-
+            return False
+        

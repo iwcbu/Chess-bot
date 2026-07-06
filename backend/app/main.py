@@ -26,6 +26,7 @@ class MoveRequest(BaseModel):
 
 class BotMoveRequest(BaseModel):
     difficulty: str
+    opening: str
 
 @app.get("/")
 async def root():
@@ -54,11 +55,11 @@ def make_move(request: MoveRequest):
 @app.post("/api/v1/game/bot-move")
 def bot_make_move(request: BotMoveRequest):
     try:
-        move = choose_bot_move(game.board, request.difficulty)
+        move = choose_bot_move(game.board, request.difficulty, request.opening)
         if move is None:
             raise HTTPException(status_code=400, detail="No legal bot move available")
         
-        return game.make_move(move)
+        return game.make_move(move.uci())
     
     except ValueError:
         raise HTTPException(status_code=400, detail="Bot failed to move")
@@ -68,8 +69,8 @@ def bot_make_move(request: BotMoveRequest):
 @app.post("/api/v1/game/undo")
 def undo_move():
     try:
-        game.undo_move()
-    except IndexError:
+        return game.undo_move()
+    except (IndexError, ValueError):
         raise HTTPException(status_code=400, detail="No move to undo")
 
 
@@ -79,6 +80,5 @@ def reset_game():
     global game 
     game = Game()
     return game.get_state()
-
 
 

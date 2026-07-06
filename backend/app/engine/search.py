@@ -8,7 +8,7 @@ from .evaluation import evaluate_Claude_Shannon
 def minimax(board: chess.Board, depth: int, maximizing: bool):
 
     if not board.is_valid():
-        raise ValueError("Board not valid dawg")
+        raise ValueError("Board not valid")
     
     if depth == 0:
         return evaluate_Claude_Shannon(board)
@@ -55,7 +55,7 @@ def minimax(board: chess.Board, depth: int, maximizing: bool):
 def choose_minimax_move(board: chess.Board, depth: int):
 
     if board.is_game_over():
-        print("Game over son")
+        print("Game over")
         return None
     
     if not board.is_valid():
@@ -106,7 +106,7 @@ def choose_minimax_move(board: chess.Board, depth: int):
 def minimax_with_alpha_beta_pruning(board: chess.Board, depth: int, alpha: float, beta: float, maximizing: bool) -> float:
     
     if not board.is_valid():
-        raise ValueError("Board not valid dawg")
+        raise ValueError("Board not valid")
     
     if board.is_game_over():
         if board.is_checkmate():
@@ -162,7 +162,7 @@ def minimax_with_alpha_beta_pruning(board: chess.Board, depth: int, alpha: float
 def choose_minimax_with_ab_move(board: chess.Board, depth: int):
 
     if board.is_game_over() or depth == 0:
-        print("Game over son")
+        print("Game over")
         return None
     
     if not board.is_valid():
@@ -171,7 +171,7 @@ def choose_minimax_with_ab_move(board: chess.Board, depth: int):
     moves_unordered = list(board.legal_moves)
     if len(moves_unordered) < 1:
         raise ValueError("Game not over but legal moves blank")
-    
+
     moves = order_moves(board, moves_unordered)
 
     if board.turn == chess.WHITE:
@@ -213,8 +213,9 @@ PIECE_VALUES = {
     chess.BISHOP: 330,
     chess.ROOK: 500,
     chess.QUEEN: 900,
-    chess.KING: 0,
+    chess.KING: 600,
 }
+
 
 def order_moves(board: chess.Board, moves: list[chess.Move]):
 
