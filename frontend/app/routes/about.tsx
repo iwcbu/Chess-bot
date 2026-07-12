@@ -4,8 +4,12 @@ import AboutPage from '../../components/AboutPage/AboutPage'
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Testing" },
-    { name: "Damn" },
+    { title: "About | MyChessBot" },
+    { 
+      name: "description",
+      content: 
+        "Learn about MyChessBot, a portfolio chess engine project built with python-chess, React and FastAPI."
+    },
   ];
 }
 

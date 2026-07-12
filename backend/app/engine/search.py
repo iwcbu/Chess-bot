@@ -161,6 +161,7 @@ def minimax_with_alpha_beta_pruning(board: chess.Board, depth: int, alpha: float
 
 def choose_minimax_with_ab_move(board: chess.Board, depth: int):
 
+    print(' choose_minimax_with_ab_move - working here')
     if board.is_game_over() or depth == 0:
         print("Game over")
         return None

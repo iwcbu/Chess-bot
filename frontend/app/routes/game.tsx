@@ -4,8 +4,12 @@ import GamePage from '../../components/GamePage/GamePage'
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "MCB Game" },
-    { name: "Games" },
+    { title: "Play Chess | MyChessBot" },
+    { 
+      name: "description", 
+      content:
+        "Play against MyChessBot, a chess engine with multiple difficulty levels and move search logic."
+    },
   ];
 }
 

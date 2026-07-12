@@ -33,9 +33,7 @@ class Game():
         }
 
         self.bot_color = chess.BLACK
-
-        o = [ "ruy_lopez", "italian_game", "queens_gambit" ] if self.bot_color else [ "sicilian_defense" "caro_kann", "kings_indian_defense" ]
-        self.bot_opening = random.choice(o)
+        self.opening = random.choice([ "sicilian_defense", "caro_kann", "kings_indian_defense" ])
 
         
 
@@ -59,7 +57,7 @@ class Game():
             "legal_moves": self.get_legal_moves(),
             "status": self.get_status(),
             "last_move": self.get_last_move(),
-            "opening": self.bot_opening
+            "opening": self.opening
         }
     
     def get_legal_moves(self):

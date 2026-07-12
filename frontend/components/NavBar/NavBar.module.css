@@ -7,9 +7,9 @@
   min-height: 72px;
   margin: 16px auto 0;
   padding: 8px;
-  border: 1px solid rgba(255, 250, 240, 0.1);
+  border: 1px solid #fffaf01a;
   border-radius: 8px;
-  background-color: rgba(25, 31, 29, 0.78);
+  background-color: #191f1dc7;
 }
 
 .ul {

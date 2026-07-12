@@ -8,6 +8,7 @@ import {
   getGame,
   makeBotMove,
   makeMove,
+  newGame,
   resetGame,
   undoMove,
 } from "../../api/chessApi";
@@ -25,6 +26,7 @@ import whiteKnight from "../../assets/white_knight.svg";
 import whitePawn from "../../assets/white_pawn.svg";
 import whiteQueen from "../../assets/white_queen.svg";
 import whiteRook from "../../assets/white_rook.svg";
+import { request } from '../../api/chessApi';
 
 type PieceSymbol = "p" | "n" | "b" | "r" | "q" | "k" | "P" | "N" | "B" | "R" | "Q" | "K";
 type PieceColor = "white" | "black";
@@ -237,16 +239,20 @@ function getGameResult(game: GameStatus | null): GameResult | null {
 }
 
 export default function GamePage() {
+
+  const [gameId, setGameId] = useState<string>("")
   const [game, setGame] = useState<GameStatus | null>(null);
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [moveDraft, setMoveDraft] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-  const [opening, setOpening] = useState<string | null>(null);
+  const [opening, setOpening] = useState<string>("caro_kann");
   const [autoBot, setAutoBot] = useState(true);
   const [pendingAction, setPendingAction] = useState<PendingAction>("load");
   const [error, setError] = useState<string | null>(null);
   const [pieceAnimation, setPieceAnimation] = useState<PieceAnimation | null>(null);
   const animationKeyRef = useRef(0);
+
+  
 
   const boardSquares = useMemo(() => (game ? parseFen(game.fen) : []), [game]);
   const selectedMoves = useMemo(
@@ -309,7 +315,7 @@ export default function GamePage() {
     (nextGame: GameStatus, animatedMove?: string | null) => {
       startPieceAnimation(animatedMove);
       setGame(nextGame);
-      setOpening(game?.bot_opening ?? null);
+      setOpening(game?.opening ?? "caro_kann");
     },
     [startPieceAnimation],
   );
@@ -318,19 +324,63 @@ export default function GamePage() {
     setPieceAnimation((currentAnimation) => (currentAnimation?.key === animationKey ? null : currentAnimation));
   };
 
-  const loadGame = useCallback(async (action: PendingAction = "refresh") => {
-    setPendingAction(action);
-    setError(null);
 
+    
+  const loadGame = useCallback(async (action: PendingAction = "refresh") => {
+    
     try {
-      const currentGame = await getGame();
-      commitGame(currentGame);
+
+      setPendingAction(action);
+      setError(null);
+      
+      let id = localStorage.getItem("gameId");
+
+      if ( !id || id === "undefined" || id === "null" ) {
+        const created = await newGame();
+            
+        setGameId(created.game_id)
+        setGame(created.state);
+        commitGame(created.state);
+        setSelectedSquare(null);
+        setError(null);
+
+        return 
+      }
+
+      const state = await request<GameStatus>(`/api/v1/game/${id}`, {
+      method: "GET",
+      });
+
+      setGameId(id);
+      setGame(state);
+      commitGame(state);
       setSelectedSquare(null);
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Could not reach the chess API.");
+      
+    } catch (err: any){
+      console.error("Saved game was not found. Creating a new one.", err);
+
+      try {
+        localStorage.removeItem("gameId");
+        const created = await newGame();
+
+        setGameId(created.game_id)
+        setGame(created.state);
+        commitGame(created.state);
+        setSelectedSquare(null);
+        setError(null);
+        } catch (requestError) {
+
+          setError(requestError instanceof Error 
+                    ? requestError.message 
+                    : "Could not reach the chess API."
+          );
+        }
     } finally {
       setPendingAction(null);
     }
+      
+
+      
   }, [commitGame]);
 
   useEffect(() => {
@@ -343,7 +393,7 @@ export default function GamePage() {
       setError(null);
 
       try {
-        const nextGame = await makeBotMove(difficulty, opening);
+        const nextGame = await makeBotMove(gameId, difficulty, opening);
         commitGame(nextGame, nextGame.last_move);
         setSelectedSquare(null);
       } catch (requestError) {
@@ -372,7 +422,7 @@ export default function GamePage() {
       setError(null);
 
       try {
-        const nextGame = await makeMove(normalizedMove);
+        const nextGame = await makeMove(gameId, normalizedMove);
         commitGame(nextGame, normalizedMove);
         setMoveDraft("");
         setSelectedSquare(null);
@@ -380,7 +430,7 @@ export default function GamePage() {
         if (autoBot && nextGame.turn === "black" && (nextGame.status === "active" || nextGame.status === "check")) {
           await wait(getAnimationDelay());
           setPendingAction("bot");
-          const botGame = await makeBotMove(difficulty, opening);
+          const botGame = await makeBotMove(gameId, difficulty, opening);
           commitGame(botGame, botGame.last_move);
         }
       } catch (requestError) {
@@ -435,7 +485,7 @@ export default function GamePage() {
     setError(null);
 
     try {
-      const nextGame = await undoMove();
+      const nextGame = await undoMove(gameId);
       commitGame(nextGame);
       setSelectedSquare(null);
     } catch (requestError) {
@@ -450,7 +500,7 @@ export default function GamePage() {
     setError(null);
 
     try {
-      const nextGame = await resetGame();
+      const nextGame = await resetGame(gameId);
       commitGame(nextGame);
       setSelectedSquare(null);
       setMoveDraft("");
@@ -465,91 +515,101 @@ export default function GamePage() {
     <main className={styles.page}>
       <section className={styles.gameHeader}>
         <div>
-          <p className={styles.eyebrow}>MyChessBot</p>
-          <h1>Chess Lab</h1>
+          <p className={styles.eyebrow}>Interactive Chess Engine</p>
+          <h1>Play MyChessBot</h1>
+          <p className={styles.headerText}>
+            Challenge a custom chess engine with multiple difficulty levels, animated move feedback, and live position
+            analysis from the backend.
+          </p>
         </div>
-        <div className={styles.statusGrid} aria-live="polite">
-          <div>
-            <span>Turn</span>
-            <strong>{game ? game.turn : "..."}</strong>
-          </div>
-          <div>
-            <span>Status</span>
-            <strong>{game ? statusLabels[game.status] ?? game.status : "Loading"}</strong>
-          </div>
-          <div>
-            <span>Last</span>
-            <strong>{game ? formatMove(game.last_move) : "None"}</strong>
-          </div>
-        </div>
+        
       </section>
 
       {error ? <div className={styles.errorBanner}>{error}</div> : null}
 
       <section className={styles.gameLayout}>
-        <div className={styles.boardShell}>
-          {game ? (
-            <div className={styles.boardFrame}>
-              <div className={[styles.chessboard, gameResult ? styles.finishedBoard : ""].join(" ")} aria-label="Chess board">
-                {boardSquares.map((square) => {
-                  const isSelected = square.id === selectedSquare;
-                  const isLegalDestination = legalDestinations.has(square.id);
-                  const isCaptureDestination = captureDestinations.has(square.id);
-                  const isLastMove = lastMoveSquares.has(square.id);
-                  const isMovingPiece = pieceAnimation?.to === square.id;
-                  const pieceAnimationStyle: PieceAnimationStyle | undefined = isMovingPiece
-                    ? ({
-                        "--move-x": pieceAnimation.deltaX,
-                        "--move-y": pieceAnimation.deltaY,
-                      } as PieceAnimationStyle)
-                    : undefined;
+        
+          <div className={styles.boardShell}>
+            {game ? (
+              <div className={styles.boardFrame}>
+                <div className={[styles.chessboard, gameResult ? styles.finishedBoard : ""].join(" ")} aria-label="Chess board">
+                  {boardSquares.map((square) => {
+                    const isSelected = square.id === selectedSquare;
+                    const isLegalDestination = legalDestinations.has(square.id);
+                    const isCaptureDestination = captureDestinations.has(square.id);
+                    const isLastMove = lastMoveSquares.has(square.id);
+                    const isMovingPiece = pieceAnimation?.to === square.id;
+                    const pieceAnimationStyle: PieceAnimationStyle | undefined = isMovingPiece
+                      ? ({
+                          "--move-x": pieceAnimation.deltaX,
+                          "--move-y": pieceAnimation.deltaY,
+                        } as PieceAnimationStyle)
+                      : undefined;
 
-                  return (
-                    <button
-                      aria-label={square.piece ? `${square.id}, ${square.piece.name}` : `${square.id}, empty`}
-                      className={[
-                        styles.square,
-                        square.isLight ? styles.lightSquare : styles.darkSquare,
-                        isSelected ? styles.selectedSquare : "",
-                        isLegalDestination ? styles.legalSquare : "",
-                        isCaptureDestination ? styles.captureSquare : "",
-                        isLastMove ? styles.lastMoveSquare : "",
-                      ].join(" ")}
-                      disabled={isBusy || !isGameActive}
-                      key={square.id}
-                      onClick={() => handleSquareClick(square)}
-                      type="button"
-                    >
-                      <span className={styles.coordinate}>{square.id}</span>
-                      {square.piece ? (
-                        <span
-                          className={[styles.pieceMover, isMovingPiece ? styles.movingPiece : ""].join(" ")}
-                          key={isMovingPiece ? pieceAnimation.key : `${square.id}-${square.piece.symbol}`}
-                          onAnimationEnd={isMovingPiece ? () => clearPieceAnimation(pieceAnimation.key) : undefined}
-                          style={pieceAnimationStyle}
-                        >
-                          <img alt={square.piece.name} draggable={false} src={square.piece.image} />
-                        </span>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
-              {gameResult ? (
-                <div className={styles.resultOverlay} aria-live="assertive">
-                  <div className={styles.resultPanel} aria-label={`${gameResult.title} ${gameResult.subtitle}`} role="status">
-                    <p>{gameResult.title}</p>
-                    <span>{gameResult.subtitle}</span>
-                  </div>
+                    return (
+                      <button
+                        aria-label={square.piece ? `${square.id}, ${square.piece.name}` : `${square.id}, empty`}
+                        className={[
+                          styles.square,
+                          square.isLight ? styles.lightSquare : styles.darkSquare,
+                          isSelected ? styles.selectedSquare : "",
+                          isLegalDestination ? styles.legalSquare : "",
+                          isCaptureDestination ? styles.captureSquare : "",
+                          isLastMove ? styles.lastMoveSquare : "",
+                        ].join(" ")}
+                        disabled={isBusy || !isGameActive}
+                        key={square.id}
+                        onClick={() => handleSquareClick(square)}
+                        type="button"
+                      >
+                        <span className={styles.coordinate}>{square.id}</span>
+                        {square.piece ? (
+                          <span
+                            className={[styles.pieceMover, isMovingPiece ? styles.movingPiece : ""].join(" ")}
+                            key={isMovingPiece ? pieceAnimation.key : `${square.id}-${square.piece.symbol}`}
+                            onAnimationEnd={isMovingPiece ? () => clearPieceAnimation(pieceAnimation.key) : undefined}
+                            style={pieceAnimationStyle}
+                          >
+                            <img alt={square.piece.name} draggable={false} src={square.piece.image} />
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
                 </div>
-              ) : null}
+                {gameResult ? (
+                  <div className={styles.resultOverlay} aria-live="assertive">
+                    <div className={styles.resultPanel} aria-label={`${gameResult.title} ${gameResult.subtitle}`} role="status">
+                      <p>{gameResult.title}</p>
+                      <span>{gameResult.subtitle}</span>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div className={styles.loadingBoard}>Loading board</div>
+            )}
+          </div>
+
+        <div className={styles.sideBar}>
+
+          <div className={styles.statusGrid} aria-live="polite">
+            <div>
+              <span>Turn</span>
+              <strong>{game ? game.turn : "..."}</strong>
             </div>
-          ) : (
-            <div className={styles.loadingBoard}>Loading board</div>
-          )}
-        </div>
+            <div>
+              <span>Status</span>
+              <strong>{game ? statusLabels[game.status] ?? game.status : "Loading"}</strong>
+            </div>
+            <div>
+              <span>Last</span>
+              <strong>{game ? formatMove(game.last_move) : "None"}</strong>
+            </div>
+          </div>
 
         <aside className={styles.sidePanel}>
+
           <div className={styles.controlGroup}>
             <label htmlFor="difficulty">Bot level</label>
             <select
@@ -618,6 +678,9 @@ export default function GamePage() {
             </div>
           </dl>
         </aside>
+
+        </div>
+
       </section>
     </main>
   );
