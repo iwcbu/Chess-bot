@@ -68,7 +68,7 @@ class Game():
 
 
 
-    def get_capture_square(board: chess.Board, move: chess.Move):
+    def get_capture_square(self, board: chess.Board, move: chess.Move):
         if board.is_en_passant(move):
             if board.turn == chess.WHITE:
                 return move.to_square - 8
