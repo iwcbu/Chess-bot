@@ -65,6 +65,19 @@ class Game():
     
     def get_legal_moves_from_board(board: chess.Board):
         return [ move.uci() for move in board.legal_moves ]
+
+
+
+    def get_capture_square(board: chess.Board, move: chess.Move):
+        if board.is_en_passant(move):
+            if board.turn == chess.WHITE:
+                return move.to_square - 8
+            else:
+                return move.to_square + 8
+
+        return move.to_square
+
+
     
     def make_move(self, move_uci):
         if move_uci not in self.get_legal_moves():
@@ -74,7 +87,9 @@ class Game():
 
 
         if self.board.is_capture(move):
-            victim = self.board.piece_at(move.to_square)
+            cs = self.get_capture_square(self.board, move)
+            victim = self.board.piece_at(cs)
+
             if self.board.turn == chess.WHITE:
                 self.black_mat_score[victim.piece_type] -= 1
             else:
@@ -91,12 +106,16 @@ class Game():
         if not self.board.move_stack:
             raise ValueError("Last move does not exist")
         
-        move = self.board.pop()
+        move = self.board.peek()
+        self.board.pop()
         print("Undid " + move.uci())
 
 
+
         if self.board.is_capture(move):
-            victim = self.board.piece_at(move.to_square)
+            cs = self.get_capture_square(self.board, move)
+            victim = self.board.piece_at(cs)
+            
             if self.board.turn == chess.WHITE:
                 self.black_mat_score[victim.piece_type] += 1
             else:
