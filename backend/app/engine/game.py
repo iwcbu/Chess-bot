@@ -85,6 +85,13 @@ class Game():
         
         move = chess.Move.from_uci(move_uci)
 
+        print("FEN:", self.board.fen())
+        print("EP square:", self.board.ep_square)
+        print("Move:", move.uci())
+        print("Legal:", move in self.board.legal_moves)
+        print("En passant:", self.board.is_en_passant(move))
+        print("Legal EP available:", self.board.has_legal_en_passant())
+
 
         if self.board.is_capture(move):
             cs = self.get_capture_square(self.board, move)
@@ -97,7 +104,6 @@ class Game():
 
         self.board.push(move)
 
-        
 
         return self.get_state()
     
@@ -125,7 +131,8 @@ class Game():
             "undone_move": move.uci(),
             "state": self.get_state()
         }
-        return ret
+        print(ret)
+        return self.get_state()
 
     def get_status(self):
         if self.board.is_checkmate():
