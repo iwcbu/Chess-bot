@@ -127,6 +127,10 @@ OPENING_LINES = {
             "d1f3", "e7e6",
             "d2d4",
         ],
+        [
+            "e2e4", "c7c6",
+            "g1f3", "d7d5"
+        ]
     ],
 
     "kings_indian_defense": [
