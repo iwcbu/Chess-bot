@@ -24,7 +24,7 @@ interface UndoMoveResponse {
   state: GameStatus;
 }
 
-const DEFAULT_API_BASE_URL = "http://localhost:8000";
+const DEFAULT_API_BASE_URL = "/api";
 
 const getApiBaseUrl = () => {
   const configuredUrl = import.meta.env.VITE_CHESS_API_URL as string | undefined;
