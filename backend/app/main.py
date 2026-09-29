@@ -43,7 +43,7 @@ def health_check():
     return {"status": "ok"}
 
 
-@app.post("/api/v1/new-game")
+@app.post("/v1/new-game")
 def new_game():
     game_id = str(uuid4())
     games[game_id] = Game()
@@ -57,7 +57,7 @@ def new_game():
         "state": games[game_id].get_state()
     }
 
-@app.get("/api/games")
+@app.get("/games")
 def get_games_dict():
     print("CHECKING GAMES:", list(games.keys()), flush=True)
     print("GAMES DICT ID:", id(games), flush=True)
@@ -68,14 +68,14 @@ def get_games_dict():
     }
 
 
-@app.get("/api/v1/game/{game_id}")
+@app.get("/v1/game/{game_id}")
 def get_game(game_id: str):
     if game_id not in games:
         raise HTTPException(status_code=404, detail="Game not found")
     
     return games[game_id].get_state()
 
-@app.post("/api/v1/game/{game_id}/move")
+@app.post("/v1/game/{game_id}/move")
 def make_move(game_id: str, request: MoveRequest):
     if game_id not in games:
         raise HTTPException( status_code=404, detail="Game not found" )
@@ -87,7 +87,7 @@ def make_move(game_id: str, request: MoveRequest):
 
 
 
-@app.post( "/api/v1/game/{game_id}/bot-move" )
+@app.post( "/v1/game/{game_id}/bot-move" )
 def bot_make_move( game_id: str, request: BotMoveRequest ):
     if game_id not in games:
         raise HTTPException( status_code=404, detail="Game not found" )
@@ -113,7 +113,7 @@ def bot_make_move( game_id: str, request: BotMoveRequest ):
 
 
 
-@app.post("/api/v1/game/{game_id}/undo")
+@app.post("/v1/game/{game_id}/undo")
 def undo_move(game_id: str):
     if game_id not in games:
         raise HTTPException( status_code=404, detail="Game not found" )
@@ -125,7 +125,7 @@ def undo_move(game_id: str):
 
 
 
-@app.post("/api/v1/game/{game_id}/reset")
+@app.post("/v1/game/{game_id}/reset")
 def reset_game(game_id: str):
     if game_id not in games:
         raise HTTPException(status_code=404, detail="Game not found")
