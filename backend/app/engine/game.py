@@ -85,17 +85,22 @@ class Game():
         
         move = chess.Move.from_uci(move_uci)
 
-        print("FEN:", self.board.fen())
-        print("EP square:", self.board.ep_square)
-        print("Move:", move.uci())
-        print("Legal:", move in self.board.legal_moves)
-        print("En passant:", self.board.is_en_passant(move))
-        print("Legal EP available:", self.board.has_legal_en_passant())
-
-
         if self.board.is_capture(move):
-            cs = self.get_capture_square(self.board, move)
-            victim = self.board.piece_at(cs)
+            print("CAPTURE DEBUG")
+            print("move:", move)
+            print("turn:", self.board.turn)
+            print("en passant:", self.board.is_en_passant(move))
+
+            capture_square = self.get_capture_square(self.board, move)
+
+            print("to square:", move.to_square)
+            print("capture square:", capture_square)
+
+            victim = self.board.piece_at(capture_square)
+            attacker = self.board.piece_at(move.from_square)
+
+            print("victim:", victim)
+            print("attacker:", attacker)
 
             if self.board.turn == chess.WHITE:
                 self.black_mat_score[victim.piece_type] -= 1
