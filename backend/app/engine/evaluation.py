@@ -336,8 +336,18 @@ def check_if_mate_in_one(board: chess.Board):
             else:
                 for move2 in list(board.legal_moves):
                     if board.is_capture(move2):
-                        victim = board.piece_at(move2.to_square)
                         attacker = board.piece_at(move2.from_square)
+
+                        if board.is_en_passant(move2):
+                            if board.turn == chess.WHITE:
+                                victim_square = move2.to_square - 8
+                            else:
+                                victim_square = move2.to_square + 8
+
+                            victim = board.piece_at(victim_square)
+                        else:
+                            victim = board.piece_at(move2.to_square)
+
                         score += P_VICTIMS[victim] - P_ATTACKER[attacker]
             board.pop()
         
